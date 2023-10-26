@@ -1,11 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:id="@+id/loginLayout"
-    android:background="@drawable/login_background_animation"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    android:background="@drawable/login_background_animation"
+    android:orientation="vertical"
+    tools:context=".activities.LoginActivity">
+
+    <LinearLayout
+        android:id="@+id/google_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_border"
+        android:gravity="center"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.886">
+
+        <TextView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@mipmap/google_logo_round"
+            tools:layout_editor_absoluteX="109dp"
+            tools:layout_editor_absoluteY="638dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:text="Connect With Google"
+            android:textColor="@color/space_cadet"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.188">
+
+
+        <LinearLayout
+            android:id="@+id/title_first_half"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:paddingStart="0dp"
+            android:paddingEnd="30dp">
+
+            <TextView
+                android:id="@+id/p1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="P"
+                android:textColor="@color/magenta_haze"
+                android:textSize="140sp" />
+
+            <TextView
+                android:id="@+id/p2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="a"
+                android:textColor="@color/brilliant_rose"
+                android:textSize="120sp" />
+
+            <TextView
+                android:id="@+id/p3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="s"
+                android:textColor="@color/finn"
+                android:textSize="120sp" />
+
+            <TextView
+                android:id="@+id/p4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="s"
+                android:textColor="@color/space_cadet"
+                android:textSize="120sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/title_second_half"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title_first_half"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="-40dp"
+            android:paddingStart="60dp"
+            android:paddingEnd="30dp">
+
+            <TextView
+                android:id="@+id/p5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="W"
+                android:textColor="@color/magenta_haze"
+                android:textSize="140sp" />
+
+            <TextView
+                android:id="@+id/p6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="a"
+                android:textColor="@color/brilliant_rose"
+                android:textSize="120sp" />
+
+            <TextView
+                android:id="@+id/p7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="r"
+                android:textColor="@color/finn"
+                android:textSize="120sp" />
+
+            <TextView
+                android:id="@+id/p8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/robus"
+                android:text="s"
+                android:textColor="@color/space_cadet"
+                android:textSize="120sp" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

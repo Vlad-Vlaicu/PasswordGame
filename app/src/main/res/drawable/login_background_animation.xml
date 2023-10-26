@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animation-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background1"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background2"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background3"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background4"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background5"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background6"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background7"/>
-    <item android:duration="2000"
+    <item android:duration="1000"
         android:drawable="@drawable/login_background8"/>
 </animation-list>
