@@ -1,6 +1,5 @@
 package com.isi.passwordgame.activities
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,7 +22,13 @@ import android.content.Intent
 import android.location.LocationManager
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentReference
@@ -32,6 +37,10 @@ import com.google.firebase.firestore.firestore
 import com.isi.passwordgame.R
 import com.isi.passwordgame.databinding.HomeLayoutBinding
 import com.isi.passwordgame.entities.User
+import com.isi.passwordgame.qr.QRService
+import com.journeyapps.barcodescanner.BarcodeCallback
+import com.journeyapps.barcodescanner.BarcodeResult
+import com.journeyapps.barcodescanner.BarcodeView
 import kotlinx.coroutines.launch
 
 class HomeActivity : ComponentActivity() {
@@ -54,7 +63,6 @@ class HomeActivity : ComponentActivity() {
         lifecycle.addObserver(mapView)
         setApiKey()
 
-        val email = intent.getStringExtra("email")
         val displayName = intent.getStringExtra("name")
 
         auth = Firebase.auth
@@ -68,19 +76,89 @@ class HomeActivity : ComponentActivity() {
         createNewUSerIfNecessary(userRef, displayName, userId)
 
         setupMap()
+
+        val createGameButton = binding.createButtonHomepage
+        val joinGameButton = binding.joinButtonHomepage
+
+        createGameButton.setOnClickListener { // Your code to be executed when the button is clicked
+            // For example, you can show a toast message
+            showQRDialog("Generate")
+        }
+
+        joinGameButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View) {
+                // Your code to be executed when the button is clicked
+                // For example, you can show a toast message
+                showQRDialog("Scan")
+            }
+        })
+
     }
 
 
-    //TODO: check if user in users collection with uid from auth, if it is not, add it
-    //TODO: ask for permissions
     //TODO: button for Join/Create Game -> QR CODE SCANNER/GENERATOR
     //TODO: Create Game: initialize a Game
 
-    private fun setApiKey() {
+    private fun showQRDialog(operation: String) {
+        val scannerLayout = R.layout.qrcode_dialog_scanner
+        val generatorLayout = R.layout.qrcode_dialog_generator
+        val dialog = BottomSheetDialog(this)
+        val layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
 
-        // set your API key
-        // Note: it is not best practice to store API keys in source code. The API key is referenced
-        // here for the convenience of this tutorial.
+        if (operation == "Scan"){
+            checkCameraPermission()
+            val view = LayoutInflater.from(this).inflate(scannerLayout, null) as View
+
+            view.layoutParams = layoutParams
+
+            dialog.setContentView(view)
+            dialog.show()
+
+            val barcodeView = view.findViewById(R.id.barcodeScannerView) as BarcodeView
+
+            barcodeView.decodeContinuous(object : BarcodeCallback {
+                override fun barcodeResult(result: BarcodeResult?) {
+                    result?.let {
+                        // Handle the scanned QR code result
+                        val scannedText = it.text
+                        // Do something with the scanned text
+                        println(scannedText)
+                    }
+                }
+
+                override fun possibleResultPoints(resultPoints: MutableList<com.google.zxing.ResultPoint>?) {
+                    // Handle possible result points
+                }
+            })
+
+
+        } else {
+            val view = LayoutInflater.from(this).inflate(generatorLayout, null) as View
+
+            view.layoutParams = layoutParams
+
+            val qrCodePicture = view.findViewById(R.id.qr_code_picture) as ImageView
+            qrCodePicture.setImageBitmap(QRService.generateQRCode("Hello", 700, 700))
+
+            dialog.setContentView(view)
+            dialog.show()
+
+        }
+    }
+
+
+    private fun createGame(){
+
+    }
+
+    private fun joinGame(){
+
+    }
+
+    private fun setApiKey() {
 
         ArcGISEnvironment.apiKey = ApiKey.create("AAPK1714ff05a97245d499de0c96db059d993Brc_5_QBH_JM6pr-6CeG-Pyi4DOLXhPxTBnZzIqv7Hx7M1tQhJq1A7cIMxsm32v")
 
@@ -129,14 +207,22 @@ class HomeActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) ==
                     PackageManager.PERMISSION_GRANTED
+        // camera permission
+        val permissionCheckCamera =
+            ContextCompat.checkSelfPermission(
+                this@HomeActivity,
+                Manifest.permission.CAMERA
+            ) ==
+                    PackageManager.PERMISSION_GRANTED
 
         // if permissions are not already granted, request permission from the user
-        if (!(permissionCheckCoarseLocation && permissionCheckFineLocation)) {
+        if (!(permissionCheckCoarseLocation && permissionCheckFineLocation && permissionCheckCamera)) {
             ActivityCompat.requestPermissions(
                 this@HomeActivity,
                 arrayOf(
                     Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.CAMERA
                 ),
                 2
             )
@@ -194,7 +280,23 @@ class HomeActivity : ComponentActivity() {
         Log.e(localClassName, message)
     }
 
+    private fun checkCameraPermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                3
+            )
+        } else {
+            // Permission is already granted, initialize the barcode scanner
 
+        }
+    }
 
     private fun createNewUSerIfNecessary(
         userRef: DocumentReference,
