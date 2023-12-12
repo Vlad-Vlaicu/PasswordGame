@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "824216735864",
+    "project_id": "passwordgame-5f814",
+    "storage_bucket": "passwordgame-5f814.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824216735864:android:90f9ef92d35a3844311d8d",
+        "android_client_info": {
+          "package_name": "com.isi.passwordgame"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "824216735864-pil006db5grs8s7n28gq0l5blfvivs4j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.isi.passwordgame",
+            "certificate_hash": "1024819ade054820cdf234ade3dedb3eb579e9c4"
+          }
+        },
+        {
+          "client_id": "824216735864-rftrgo6menkjql7d024ir5ilh4mjqrb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXRdhISz_LU7DatIDRCksq2Y7e0i31U-0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "824216735864-rftrgo6menkjql7d024ir5ilh4mjqrb1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

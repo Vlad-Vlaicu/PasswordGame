@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "824216735864",
+    "project_id": "passwordgame-5f814",
+    "storage_bucket": "passwordgame-5f814.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824216735864:android:90f9ef92d35a3844311d8d",
+        "android_client_info": {
+          "package_name": "com.isi.passwordgame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXRdhISz_LU7DatIDRCksq2Y7e0i31U-0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

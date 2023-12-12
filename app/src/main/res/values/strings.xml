@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">PasswordGame</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="location_permissions_denied">location_permisstion denied</string>
+    <string name="enable_location_message">Location services are disabled. Do you want to enable them?</string>
+    <string name="enable_location">Enable Location</string>
+    <string name="cancel">Cancel\n</string>
 </resources>
