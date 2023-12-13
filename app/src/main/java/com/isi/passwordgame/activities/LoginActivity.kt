@@ -45,11 +45,9 @@ class LoginActivity : ComponentActivity() {
 
     private fun setup() {
         initLoginLayout()
-
         binding.googleConnect.setOnClickListener {
             signInGoogle()
         }
-
     }
 
     private fun initLoginLayout() {

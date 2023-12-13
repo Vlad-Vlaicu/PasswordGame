@@ -1,7 +1,20 @@
 package com.isi.passwordgame.activities
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.location.LocationManager
 import android.os.Bundle
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -13,22 +26,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
-import com.google.firebase.Firebase
-import android.graphics.Color
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.content.Intent
-import android.location.LocationManager
-import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentReference
@@ -38,16 +37,15 @@ import com.isi.passwordgame.R
 import com.isi.passwordgame.databinding.HomeLayoutBinding
 import com.isi.passwordgame.entities.User
 import com.isi.passwordgame.qr.QRService
-import com.journeyapps.barcodescanner.BarcodeCallback
-import com.journeyapps.barcodescanner.BarcodeResult
-import com.journeyapps.barcodescanner.BarcodeView
 import kotlinx.coroutines.launch
+import javax.annotation.Nullable
 
 class HomeActivity : ComponentActivity() {
     private lateinit var binding: HomeLayoutBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
     private lateinit var mapView: MapView
+    private val REQUEST_CODE_SCAN = 1
     private val locationDisplay: LocationDisplay by lazy { mapView.locationDisplay }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -82,70 +80,33 @@ class HomeActivity : ComponentActivity() {
 
         createGameButton.setOnClickListener { // Your code to be executed when the button is clicked
             // For example, you can show a toast message
-            showQRDialog("Generate")
+            val intent = Intent(this, StartGameActivity::class.java)
+            startActivity(intent)
         }
 
-        joinGameButton.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                // Your code to be executed when the button is clicked
-                // For example, you can show a toast message
-                showQRDialog("Scan")
-            }
-        })
+        joinGameButton.setOnClickListener { // Your code to be executed when the button is clicked
+            // For example, you can show a toast message
+            checkCameraPermission()
+
+            val intent = Intent(this, QRScanActivity::class.java)
+            startActivityForResult(intent, REQUEST_CODE_SCAN)
+        }
 
     }
 
-
-    //TODO: button for Join/Create Game -> QR CODE SCANNER/GENERATOR
     //TODO: Create Game: initialize a Game
 
-    private fun showQRDialog(operation: String) {
-        val scannerLayout = R.layout.qrcode_dialog_scanner
-        val generatorLayout = R.layout.qrcode_dialog_generator
-        val dialog = BottomSheetDialog(this)
-        val layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-
-        if (operation == "Scan"){
-            checkCameraPermission()
-            val view = LayoutInflater.from(this).inflate(scannerLayout, null) as View
-
-            view.layoutParams = layoutParams
-
-            dialog.setContentView(view)
-            dialog.show()
-
-            val barcodeView = view.findViewById(R.id.barcodeScannerView) as BarcodeView
-
-            barcodeView.decodeContinuous(object : BarcodeCallback {
-                override fun barcodeResult(result: BarcodeResult?) {
-                    result?.let {
-                        // Handle the scanned QR code result
-                        val scannedText = it.text
-                        // Do something with the scanned text
-                        println(scannedText)
-                    }
-                }
-
-                override fun possibleResultPoints(resultPoints: MutableList<com.google.zxing.ResultPoint>?) {
-                    // Handle possible result points
-                }
-            })
-
-
-        } else {
-            val view = LayoutInflater.from(this).inflate(generatorLayout, null) as View
-
-            view.layoutParams = layoutParams
-
-            val qrCodePicture = view.findViewById(R.id.qr_code_picture) as ImageView
-            qrCodePicture.setImageBitmap(QRService.generateQRCode("Hello", 700, 700))
-
-            dialog.setContentView(view)
-            dialog.show()
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SCAN) {
+            if (resultCode == RESULT_OK) {
+                // Handle the scanned data received from ScannerActivity
+                val scannedData = data?.getStringExtra("SCANNED_DATA")
+                // Do something with the scanned data
+                //TODO: Join Game
+            } else if (resultCode == RESULT_CANCELED) {
+                // Handle the case where scanning was canceled
+            }
         }
     }
 
