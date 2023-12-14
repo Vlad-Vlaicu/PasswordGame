@@ -1,16 +1,49 @@
 package com.isi.passwordgame.entities
 
 data class Game (
-    val uuid: String,
-    val players: List<Player>,
-    val startTime: String,
-    val allocatedTime: String,
-    val captureDiameter: Double,
-    val captureTime: Int,
-    val mapDiameter: Double,
-    val mapCenter: Coordinates,
-    val isJoinEligible: Boolean,
-    val isFinished: Boolean,
-    val events: List<String>,
-    val password: String
-)
+    var uuid: String,
+    var players: List<Player>,
+    var startTime: String,
+    var allocatedTime: String,
+    var captureDiameter: Double,
+    var captureTime: Int,
+    var mapDiameter: Double,
+    var mapCenter: Coordinates,
+    var isJoinEligible: Boolean,
+    var isFinished: Boolean,
+    var events: List<String>,
+    var password: String
+) {
+
+    // Empty constructor
+    constructor() : this(
+        "",
+        mutableListOf(),
+        "",
+        "",
+        0.0,
+        0,
+        0.0,
+        Coordinates(0.0, 0.0), // You may need to provide default values for nested data classes or objects
+        false,
+        false,
+        mutableListOf(),
+        ""
+    )
+    fun build(): Game {
+        return Game(
+            uuid,
+            players,
+            startTime,
+            allocatedTime,
+            captureDiameter,
+            captureTime,
+            mapDiameter,
+            mapCenter,
+            isJoinEligible,
+            isFinished,
+            events,
+            password
+        )
+    }
+}

@@ -10,10 +10,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
@@ -26,7 +22,8 @@ import com.arcgismaps.mapping.ArcGISMap
 import com.arcgismaps.mapping.BasemapStyle
 import com.arcgismaps.mapping.view.LocationDisplay
 import com.arcgismaps.mapping.view.MapView
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -36,9 +33,8 @@ import com.google.firebase.firestore.firestore
 import com.isi.passwordgame.R
 import com.isi.passwordgame.databinding.HomeLayoutBinding
 import com.isi.passwordgame.entities.User
-import com.isi.passwordgame.qr.QRService
 import kotlinx.coroutines.launch
-import javax.annotation.Nullable
+
 
 class HomeActivity : ComponentActivity() {
     private lateinit var binding: HomeLayoutBinding
@@ -77,6 +73,10 @@ class HomeActivity : ComponentActivity() {
 
         val createGameButton = binding.createButtonHomepage
         val joinGameButton = binding.joinButtonHomepage
+        val logoutButton = binding.logoutButton
+        val homepageName = binding.nameTextviewHomepage
+
+        homepageName.setText(displayName)
 
         createGameButton.setOnClickListener { // Your code to be executed when the button is clicked
             // For example, you can show a toast message
@@ -92,6 +92,21 @@ class HomeActivity : ComponentActivity() {
             startActivityForResult(intent, REQUEST_CODE_SCAN)
         }
 
+        logoutButton.setOnClickListener{
+            FirebaseAuth.getInstance().signOut()
+            // Sign out from Google Sign-In
+            // Sign out from Google Sign-In
+            val googleSignInClient =
+                GoogleSignIn.getClient(this, GoogleSignInOptions.DEFAULT_SIGN_IN)
+            googleSignInClient.signOut().addOnCompleteListener(this) {
+                // Sign out is complete
+                // Now, you can navigate to the LoginActivity or perform other actions
+                val intent = Intent(this@HomeActivity, LoginActivity::class.java)
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(intent)
+                finish()
+            }
+        }
     }
 
     //TODO: Create Game: initialize a Game

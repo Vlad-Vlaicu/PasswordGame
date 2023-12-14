@@ -1,10 +1,22 @@
 package com.isi.passwordgame.entities
 
 data class Player(
-    val userId: String,
-    val playerTag: List<PlayerTag>,
-    val playerPosition: Coordinates,
-    val powerUps: List<PowerUp>,
-    val isCaught: Boolean,
-    val passwordPiece: String
+    var userId: String,
+    var username: String,
+    var playerTag: List<PlayerTag>,
+    var playerPosition: Coordinates,
+    var powerUps: List<PowerUp>,
+    var isCaught: Boolean,
+    var passwordPiece: String
+) {
+    // Empty constructor
+    constructor() : this(
+        userId = "",
+        username = "",
+        playerTag = mutableListOf(),
+        playerPosition = Coordinates(0.0, 0.0),
+        powerUps = mutableListOf(),
+        isCaught = false,
+        passwordPiece = ""
     )
+}

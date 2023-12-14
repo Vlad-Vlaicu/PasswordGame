@@ -5,5 +5,6 @@ enum class PlayerTag(val tagName: String) {
     FBI("FBI Agent"),
     HACKER_LEADER("Hacker Leader"),
     FBI_LEADER("FBI Leader"),
-    CAPTURED("Captured")
+    CAPTURED("Captured"),
+    GAME_MASTER("Game Master")
 }
