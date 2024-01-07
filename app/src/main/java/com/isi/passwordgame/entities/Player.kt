@@ -7,7 +7,7 @@ data class Player(
     var playerPosition: Coordinates,
     var powerUps: List<PowerUp>,
     var isCaught: Boolean,
-    var passwordPiece: String
+    var passwordPiece: PasswordPiece
 ) {
     // Empty constructor
     constructor() : this(
@@ -17,6 +17,6 @@ data class Player(
         playerPosition = Coordinates(0.0, 0.0),
         powerUps = mutableListOf(),
         isCaught = false,
-        passwordPiece = ""
+        passwordPiece = PasswordPiece()
     )
 }
