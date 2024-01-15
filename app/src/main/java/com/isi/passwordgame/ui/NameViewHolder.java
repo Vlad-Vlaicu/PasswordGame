@@ -13,6 +13,6 @@ public class NameViewHolder extends RecyclerView.ViewHolder {
 
     public NameViewHolder(@NonNull View itemView) {
         super(itemView);
-        textView = itemView.findViewById(R.id.textView);
+        textView = itemView.findViewById(R.id.nameCardTextView);
     }
 }

@@ -6,4 +6,12 @@ data class User(
     var isInGame: Boolean,
     var currentGameId: String,
     var history: List<Game>
-)
+) {
+    constructor() : this(
+        "",
+        "",
+        false,
+        "",
+        mutableListOf()
+    )
+}

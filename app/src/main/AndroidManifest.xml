@@ -21,10 +21,15 @@
         android:theme="@style/Theme.PasswordGame"
         tools:targetApi="31">
         <activity
-            android:name=".activities.StartGameActivity"
+            android:name=".activities.GameActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat"
-            android:exported="false" />
+            android:theme="@style/Theme.AppCompat"/>
+        <activity
+            android:name=".activities.StartGameActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat" />
         <activity
             android:name=".activities.QRScanActivity"
             android:exported="false"

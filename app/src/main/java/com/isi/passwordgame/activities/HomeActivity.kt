@@ -109,8 +109,6 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
-    //TODO: Create Game: initialize a Game
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_SCAN) {
@@ -119,6 +117,12 @@ class HomeActivity : ComponentActivity() {
                 val scannedData = data?.getStringExtra("SCANNED_DATA")
                 // Do something with the scanned data
                 //TODO: Join Game
+                val intent = Intent(this@HomeActivity, StartGameActivity::class.java)
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                intent.putExtra("IS_GUEST", true)
+                intent.putExtra("GAME_UUID", scannedData)
+                startActivity(intent)
+                finish()
             } else if (resultCode == RESULT_CANCELED) {
                 // Handle the case where scanning was canceled
             }

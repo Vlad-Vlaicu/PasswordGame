@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +17,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -33,9 +31,9 @@ import com.isi.passwordgame.qr.QRService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class StartGameActivity extends AppCompatActivity {
@@ -52,11 +50,15 @@ public class StartGameActivity extends AppCompatActivity {
         Intent intent = getIntent();
         var recycleView = binding.nameRecycleView;
         var startButton = binding.startGameButton;
+        startButton.setVisibility(View.GONE);
+        var nextIntent = new Intent(this, GameActivity.class);
+        nextIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
 
         //if player joined the game
-        boolean isJoinGamePlayer = intent.getBooleanExtra("IS_GUEST", false);
+        AtomicBoolean isJoinGamePlayer = new AtomicBoolean(intent.getBooleanExtra("IS_GUEST", false));
         var gameID = "";
-        if (isJoinGamePlayer){
+        if (isJoinGamePlayer.get()){
             //hide start button
             startButton.setVisibility(View.GONE);
             //get the game UUID
@@ -79,6 +81,57 @@ public class StartGameActivity extends AppCompatActivity {
                                 var player = new Player();
                                 if (null == currentUser) {
                                     finish();
+                                }
+
+                                //check if the player reentered the game
+                                var playerIds = game.getPlayers().stream().map(s -> s.getUserId()).collect(Collectors.toList());
+                                if (playerIds.contains(currentUser.getUid())){
+                                    var myPlayer = game.getPlayers().stream().filter(s -> s.getUserId().equals(currentUser.getUid())).findFirst();
+                                    if (myPlayer.isPresent() && myPlayer.get().getPlayerTag().contains(PlayerTag.GAME_MASTER)){
+                                        isJoinGamePlayer.set(false);
+                                        if (game.getPlayers().size() > 1){
+                                            startButton.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+
+                                    if(!game.isJoinEligible()){
+                                        var userRef = db.collection("users").document(currentUser.getUid());
+                                        userRef.addSnapshotListener((playerSnapshot, f) -> {
+                                            if (f != null) {
+                                                // Handle errors
+                                                return;
+                                            }
+
+                                            if (playerSnapshot != null && playerSnapshot.exists()) {
+                                                // Document exists, retrieve the updated Player object
+                                                User user = playerSnapshot.toObject(User.class);
+
+                                                // Update the UI with the updated Player object
+                                                if (user != null) {
+                                                    user.setInGame(true);
+                                                    user.setCurrentGameId(game.getUuid());
+
+                                                    userRef.set(user).addOnSuccessListener(aVoid -> {
+                                                                // Document updated successfully
+                                                                // You can perform any additional actions here
+                                                            })
+                                                            .addOnFailureListener(s -> {
+                                                                // Update failed
+                                                                // Handle the failure
+                                                            });
+
+                                                    //Start Game
+                                                    startActivity(nextIntent);
+                                                    finish();
+                                                }
+                                            } else {
+                                                // Document does not exist
+                                                // Handle the case where the player with the specified ID does not exist
+                                            }
+                                        });
+                                    }
+
+                                    return;
                                 }
 
                                 FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -169,21 +222,20 @@ public class StartGameActivity extends AppCompatActivity {
                             var coordinates = new Coordinates(latitude, longitude);
                             player.setPlayerPosition(coordinates);
                             newGame.setMapCenter(coordinates);
+                            newGame.setJoinEligible(true);
                             // Use latitude and longitude as needed
                             var db = FirebaseFirestore.getInstance();
                             db.collection("games")
                                     .document(newGame.getUuid())
                                     .set(newGame)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            qrCode.setImageBitmap(QRService.Companion.generateQRCode(newGame.getUuid(), 700, 700));
-                                        }
+                                    .addOnSuccessListener(aVoid -> {
+
+                                        qrCode.setImageBitmap(QRService.Companion.generateQRCode(newGame.getUuid(), 700, 700));
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            finish();
+                                            Log.d("ERROR", "Could not create game");
                                         }
                                     });
 
@@ -228,6 +280,10 @@ public class StartGameActivity extends AppCompatActivity {
                     nameList.addAll(playerList);
                     stringAdapter.updateData(nameList);
 
+                    if (nameList.size() > 1 && !isJoinGamePlayer.get()){
+                        startButton.setVisibility(View.VISIBLE);
+                    }
+
                     //Start Game
                     if(!updatedGame.isJoinEligible()){
                         var userRef = db.collection("users").document(currentUser.getUid());
@@ -255,7 +311,9 @@ public class StartGameActivity extends AppCompatActivity {
                                                 // Handle the failure
                                             });
 
-                                    //TODO: Start the new game go to new activity
+                                    //Start Game
+                                    startActivity(nextIntent);
+                                    finish();
                                 }
                             } else {
                                 // Document does not exist
@@ -285,6 +343,10 @@ public class StartGameActivity extends AppCompatActivity {
                 if (gameSnapshot != null && gameSnapshot.exists()) {
 
                     Game game = gameSnapshot.toObject(Game.class);
+
+                    if (!game.isJoinEligible()){
+                        return;
+                    }
 
                     // update game data, make players have specific roles, set the password
                     if (game != null) {
@@ -319,6 +381,11 @@ public class StartGameActivity extends AppCompatActivity {
                         game.setAllocatedTime(Duration.ofMinutes(15).toString());
 
                         gameReference.set(game);
+
+                        //Start Game
+                        startActivity(nextIntent);
+                        finish();
+
                     }
                 } else {
                     // Document does not exist
