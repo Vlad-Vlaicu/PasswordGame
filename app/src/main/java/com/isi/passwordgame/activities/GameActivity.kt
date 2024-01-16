@@ -32,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.isi.passwordgame.databinding.ActivityGameBinding
 import com.isi.passwordgame.entities.Coordinates
 import com.isi.passwordgame.entities.Game
+import com.isi.passwordgame.entities.PlayerTag
 import com.isi.passwordgame.entities.User
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
@@ -119,7 +120,7 @@ class GameActivity : AppCompatActivity() {
                                         }
                                 }
                                 gameMap.map = map
-                                
+
 
                                 val centerPoint = com.arcgismaps.geometry.Point(mapCenter.get().xCoordinate, mapCenter.get().yCoordinate, SpatialReference.wgs84())
                                 val graphicsOverlay = GraphicsOverlay()
@@ -155,6 +156,55 @@ class GameActivity : AppCompatActivity() {
                                 val polylineGraphic = Graphic(polyline, polylineSymbol)
 
                                 graphicsOverlay.graphics.add(polylineGraphic)
+
+                                val players = game?.players
+
+                                if (players != null) {
+
+                                    var currentUserTags: List<PlayerTag>? = null
+
+                                    for (player in players) {
+                                        if (currentUser != null) {
+                                            if (player.userId.equals(currentUser.uid)){
+                                                currentUserTags = player.playerTag;
+                                            }
+
+                                        }
+                                    }
+
+                                    for (player in players) {
+
+                                        if (currentUserTags != null) {
+                                            var isEnemy = true
+                                            for (userTag in currentUserTags){
+                                                if (currentUser != null) {
+                                                    if (userTag in player.playerTag && player.userId != currentUser.uid){
+                                                        isEnemy = false;
+                                                    }
+                                                }
+                                            }
+
+                                            if (!isEnemy){
+
+                                                val point = Point(player.playerPosition.yCoordinate, player.playerPosition.xCoordinate, SpatialReference.wgs84())
+
+                                                // create a point symbol that is an small red circle
+                                                val playerMarkerSymbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.red, 10f)
+
+                                                // create a blue outline symbol and assign it to the outline property of the simple marker symbol
+                                                val blueOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.fromRgba(0, 0, 255), 2f)
+                                                simpleMarkerSymbol.outline = blueOutlineSymbol
+
+                                                // create a graphic with the point geometry and symbol
+                                                val pointGraphic = Graphic(point, simpleMarkerSymbol)
+
+                                                // add the point graphic to the graphics overlay
+                                                graphicsOverlay.graphics.add(pointGraphic)
+                                            }
+
+                                        }
+                                    }
+                                }
 
                             }
                         }
