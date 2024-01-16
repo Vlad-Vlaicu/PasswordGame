@@ -47,6 +47,10 @@ class GameActivity : AppCompatActivity() {
     private val gameUpdateTask = GameUpdateTask()
     val startTime = AtomicReference("")
     val gameDuration = AtomicReference("")
+    val gameId = AtomicReference("")
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
+    val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,11 +65,6 @@ class GameActivity : AppCompatActivity() {
         val gameHeader = binding.gameHeader
         val gameBody = binding.gameBody
         val gameFooter = binding.gameFooter
-
-        val auth = FirebaseAuth.getInstance()
-        val currentUser = auth.currentUser
-        val db = FirebaseFirestore.getInstance()
-        val gameId = AtomicReference("")
         val mapCenter = AtomicReference(Coordinates(0.0, 0.0))
         val gameRadius = AtomicReference(0.0)
         val captureTime = AtomicInteger()
@@ -100,6 +99,7 @@ class GameActivity : AppCompatActivity() {
                             if (documentSnapshot.exists()) {
                                 // Document exists, retrieve the Game object
                                 val game = documentSnapshot.toObject(Game::class.java)
+                                gameId.set(user.currentGameId)
                                 startTime.set(game?.startTime ?: "")
                                 gameDuration.set(game?.allocatedTime ?: "")
                                 mapCenter.set(game?.mapCenter ?: Coordinates(0.0, 0.0))
@@ -124,34 +124,58 @@ class GameActivity : AppCompatActivity() {
                                 gameMap.map = map
 
 
-                                val centerPoint = com.arcgismaps.geometry.Point(mapCenter.get().xCoordinate, mapCenter.get().yCoordinate, SpatialReference.wgs84())
+                                val centerPoint = com.arcgismaps.geometry.Point(
+                                    mapCenter.get().xCoordinate,
+                                    mapCenter.get().yCoordinate,
+                                    SpatialReference.wgs84()
+                                )
                                 val graphicsOverlay = GraphicsOverlay()
                                 gameMap.graphicsOverlays.add(graphicsOverlay)
 
                                 // create a point symbol that is an small red circle
-                                val simpleMarkerSymbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.red, 10f)
+                                val simpleMarkerSymbol = SimpleMarkerSymbol(
+                                    SimpleMarkerSymbolStyle.Circle,
+                                    Color.red,
+                                    10f
+                                )
 
                                 // create a blue outline symbol and assign it to the outline property of the simple marker symbol
-                                val blueOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.fromRgba(0, 0, 255), 2f)
+                                val blueOutlineSymbol = SimpleLineSymbol(
+                                    SimpleLineSymbolStyle.Solid,
+                                    Color.fromRgba(0, 0, 255),
+                                    2f
+                                )
                                 simpleMarkerSymbol.outline = blueOutlineSymbol
 
                                 // Create a polylineBuilder with a spatial reference and add three points to it.
                                 // Then get the polyline from the polyline builder
 
                                 // create a blue line symbol for the polyline
-                                val polylineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.fromRgba(0, 0, 255), 3f)
+                                val polylineSymbol = SimpleLineSymbol(
+                                    SimpleLineSymbolStyle.Solid,
+                                    Color.fromRgba(0, 0, 255),
+                                    3f
+                                )
                                 val degreesPerMeter = 1.0 / (111319.9)
                                 val radiusDegrees = gameRadius.get() * degreesPerMeter
 
                                 val polylineBuilder = PolylineBuilder(SpatialReference.wgs84()) {
                                     for (angle in 0 until 360 step 10) {
-                                        val x = centerPoint.y + radiusDegrees  * Math.cos(Math.toRadians(angle.toDouble()))
-                                        val y = centerPoint.x + radiusDegrees  * Math.sin(Math.toRadians(angle.toDouble()))
+                                        val x = centerPoint.y + radiusDegrees * Math.cos(
+                                            Math.toRadians(angle.toDouble())
+                                        )
+                                        val y = centerPoint.x + radiusDegrees * Math.sin(
+                                            Math.toRadians(angle.toDouble())
+                                        )
                                         addPoint(x, y)
                                     }
                                     val angle = 0
-                                    val x = centerPoint.y + radiusDegrees  * Math.cos(Math.toRadians(angle.toDouble()))
-                                    val y = centerPoint.x + radiusDegrees  * Math.sin(Math.toRadians(angle.toDouble()))
+                                    val x = centerPoint.y + radiusDegrees * Math.cos(
+                                        Math.toRadians(angle.toDouble())
+                                    )
+                                    val y = centerPoint.x + radiusDegrees * Math.sin(
+                                        Math.toRadians(angle.toDouble())
+                                    )
                                     addPoint(x, y)
                                 }
                                 val polyline = polylineBuilder.toGeometry()
@@ -167,7 +191,7 @@ class GameActivity : AppCompatActivity() {
 
                                     for (player in players) {
                                         if (currentUser != null) {
-                                            if (player.userId.equals(currentUser.uid)){
+                                            if (player.userId.equals(currentUser.uid)) {
                                                 currentUserTags = player.playerTag;
                                             }
 
@@ -178,27 +202,40 @@ class GameActivity : AppCompatActivity() {
 
                                         if (currentUserTags != null) {
                                             var isEnemy = true
-                                            for (userTag in currentUserTags){
+                                            for (userTag in currentUserTags) {
                                                 if (currentUser != null) {
-                                                    if (userTag in player.playerTag && player.userId != currentUser.uid){
+                                                    if (userTag in player.playerTag && player.userId != currentUser.uid) {
                                                         isEnemy = false;
                                                     }
                                                 }
                                             }
 
-                                            if (!isEnemy){
+                                            if (!isEnemy) {
 
-                                                val point = Point(player.playerPosition.yCoordinate, player.playerPosition.xCoordinate, SpatialReference.wgs84())
+                                                val point = Point(
+                                                    player.playerPosition.yCoordinate,
+                                                    player.playerPosition.xCoordinate,
+                                                    SpatialReference.wgs84()
+                                                )
 
                                                 // create a point symbol that is an small red circle
-                                                val playerMarkerSymbol = SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, Color.red, 10f)
+                                                val playerMarkerSymbol = SimpleMarkerSymbol(
+                                                    SimpleMarkerSymbolStyle.Circle,
+                                                    Color.red,
+                                                    10f
+                                                )
 
                                                 // create a blue outline symbol and assign it to the outline property of the simple marker symbol
-                                                val blueOutlineSymbol = SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Color.fromRgba(0, 0, 255), 2f)
+                                                val blueOutlineSymbol = SimpleLineSymbol(
+                                                    SimpleLineSymbolStyle.Solid,
+                                                    Color.fromRgba(0, 0, 255),
+                                                    2f
+                                                )
                                                 simpleMarkerSymbol.outline = blueOutlineSymbol
 
                                                 // create a graphic with the point geometry and symbol
-                                                val pointGraphic = Graphic(point, simpleMarkerSymbol)
+                                                val pointGraphic =
+                                                    Graphic(point, simpleMarkerSymbol)
 
                                                 // add the point graphic to the graphics overlay
                                                 graphicsOverlay.graphics.add(pointGraphic)
@@ -210,7 +247,6 @@ class GameActivity : AppCompatActivity() {
 
                             }
                         }
-
 
 
                 }
@@ -231,13 +267,37 @@ class GameActivity : AppCompatActivity() {
             val currentTime = getCurrentTime()
             timer.text = currentTime
 
+            if (currentTime == "GAME OVER") {
+                val gameRef = db.collection("games").document(gameId.get())
+                gameRef.get()
+                    .addOnSuccessListener { documentSnapshot ->
+                        if (documentSnapshot.exists()) {
+                            // Document exists, retrieve the Game object
+                            val game = documentSnapshot.toObject(Game::class.java)
+                            if (game != null) {
+                                game.isFinished = true
+                                //TODO: GO TO RESULT PAGE
+                            }
+
+                            if (game != null) {
+                                gameRef.set(game)
+                            }
+
+                        }
+                    }
+            }
+
+
+
+
+
             // Reschedule the task after a delay (e.g., 1000 milliseconds for 1 second)
             handler.postDelayed(this, 500)
         }
 
         private fun getCurrentTime(): String {
 
-            if(startTime.toString() == "" || gameDuration.toString() == ""){
+            if (startTime.toString() == "" || gameDuration.toString() == "") {
                 return "Loading"
             }
 
@@ -252,6 +312,9 @@ class GameActivity : AppCompatActivity() {
             val endTime = startTime.plus(gameDuration)
             val currentTime = LocalDateTime.now()
             val remainingTime = Duration.between(currentTime, endTime)
+            if (remainingTime.isNegative || remainingTime.isZero) {
+                return "GAME OVER"
+            }
 
             // Extract minutes and seconds from the remaining time
             val remainingMinutes = remainingTime.toMinutes()
@@ -263,6 +326,13 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun setApiKey() {
-        ArcGISEnvironment.apiKey = ApiKey.create("AAPK1714ff05a97245d499de0c96db059d993Brc_5_QBH_JM6pr-6CeG-Pyi4DOLXhPxTBnZzIqv7Hx7M1tQhJq1A7cIMxsm32v")
+        ArcGISEnvironment.apiKey =
+            ApiKey.create("AAPK1714ff05a97245d499de0c96db059d993Brc_5_QBH_JM6pr-6CeG-Pyi4DOLXhPxTBnZzIqv7Hx7M1tQhJq1A7cIMxsm32v")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Remove callbacks when the activity is destroyed to prevent memory leaks
+        handler.removeCallbacks(gameUpdateTask)
     }
 }
