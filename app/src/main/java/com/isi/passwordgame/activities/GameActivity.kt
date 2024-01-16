@@ -3,6 +3,7 @@ package com.isi.passwordgame.activities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -28,6 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.isi.passwordgame.databinding.ActivityGameBinding
 import com.isi.passwordgame.entities.Coordinates
 import com.isi.passwordgame.entities.Game
+import com.isi.passwordgame.entities.Player
 import com.isi.passwordgame.entities.PlayerTag
 import com.isi.passwordgame.entities.User
 import kotlinx.coroutines.launch
@@ -51,6 +53,7 @@ class GameActivity : AppCompatActivity() {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     val db = FirebaseFirestore.getInstance()
+    private lateinit var currentPlayer: Player
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +72,9 @@ class GameActivity : AppCompatActivity() {
         val gameRadius = AtomicReference(0.0)
         val captureTime = AtomicInteger()
         val captureRadius = AtomicReference(0.0)
+        val timerPower = binding.timeManipulationPowerup;
+        val scanPower = binding.scanPowerup
+        val passwordPower = binding.passwordPowerup
 
         val userRef = db.collection("users").document(currentUser?.uid ?: "")
 
@@ -193,6 +199,7 @@ class GameActivity : AppCompatActivity() {
                                         if (currentUser != null) {
                                             if (player.userId.equals(currentUser.uid)) {
                                                 currentUserTags = player.playerTag;
+                                                currentPlayer = player
                                             }
 
                                         }
@@ -243,6 +250,16 @@ class GameActivity : AppCompatActivity() {
 
                                         }
                                     }
+
+                                    //setup Powerup specific to player role
+                                    if (PlayerTag.FBI in currentPlayer.playerTag) {
+                                        timerPower.setText("INCREASE TIME")
+                                        passwordPower.setText("GUESS PASSWORD")
+                                    } else {
+                                        timerPower.setText("DECREASE TIME")
+                                    }
+                                    scanPower.setText("SATELLITE SCAN")
+                                    passwordPower.setText("RESET PASSWORD")
                                 }
 
                             }
@@ -255,6 +272,36 @@ class GameActivity : AppCompatActivity() {
                 // Handle the case where the player with the specified ID does not exist
             }
         }
+
+        timerPower.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                // Action to be performed when the button is clicked
+                var powerType = timerPower.text
+
+                val gameRef = db.collection("games").document(gameId.get())
+                gameRef.get()
+                    .addOnSuccessListener { documentSnapshot ->
+                        if (documentSnapshot.exists()) {
+                            // Document exists, retrieve the Game object
+                            val game = documentSnapshot.toObject(Game::class.java)
+                            if (game != null) {
+                                val duration = Duration.parse(game.allocatedTime)
+                                var newDuration = ""
+                                if (powerType == "INCREASE TIME"){
+                                    val modifiedDuration = duration.plusMinutes(3)
+                                    newDuration = modifiedDuration.toString()
+                                } else {
+                                    val modifiedDuration = duration.minusMinutes(3)
+                                    newDuration = modifiedDuration.toString()
+                                }
+                                game.allocatedTime = newDuration
+                                gameRef.set(game)
+                            }
+                        }
+                    }
+            }
+
+        })
 
         val map = ArcGISMap(BasemapStyle.ArcGISTopographic)
         gameMap.map = map
@@ -286,9 +333,6 @@ class GameActivity : AppCompatActivity() {
                         }
                     }
             }
-
-
-
 
 
             // Reschedule the task after a delay (e.g., 1000 milliseconds for 1 second)
