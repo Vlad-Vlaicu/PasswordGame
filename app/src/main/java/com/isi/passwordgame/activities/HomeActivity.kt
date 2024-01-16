@@ -116,7 +116,6 @@ class HomeActivity : ComponentActivity() {
                 // Handle the scanned data received from ScannerActivity
                 val scannedData = data?.getStringExtra("SCANNED_DATA")
                 // Do something with the scanned data
-                //TODO: Join Game
                 val intent = Intent(this@HomeActivity, StartGameActivity::class.java)
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 intent.putExtra("IS_GUEST", true)

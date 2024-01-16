@@ -50,7 +50,7 @@ public class StartGameActivity extends AppCompatActivity {
         Intent intent = getIntent();
         var recycleView = binding.nameRecycleView;
         var startButton = binding.startGameButton;
-        startButton.setVisibility(View.GONE);
+        //startButton.setVisibility(View.GONE);
         var nextIntent = new Intent(this, GameActivity.class);
         nextIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -89,7 +89,7 @@ public class StartGameActivity extends AppCompatActivity {
                                     var myPlayer = game.getPlayers().stream().filter(s -> s.getUserId().equals(currentUser.getUid())).findFirst();
                                     if (myPlayer.isPresent() && myPlayer.get().getPlayerTag().contains(PlayerTag.GAME_MASTER)){
                                         isJoinGamePlayer.set(false);
-                                        if (game.getPlayers().size() > 1){
+                                        if (game.getPlayers().size() >= 1){
                                             startButton.setVisibility(View.VISIBLE);
                                         }
                                     }
@@ -377,7 +377,7 @@ public class StartGameActivity extends AppCompatActivity {
 
                         game.setCaptureDiameter(7);
                         game.setCaptureTime(7);
-                        game.setMapDiameter(150);
+                        game.setMapDiameter(500);
                         game.setAllocatedTime(Duration.ofMinutes(15).toString());
 
                         gameReference.set(game);
